@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glory Trading — Maîtrisez l'Analyse Technique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
+<style>
+/* ── VARIABLES ─────────────────────────── */
+:root{
+  --bg:#050810; --bg-card:#0c1226; --bg-card2:#101830;
+  --gold:#c9a84c; --gold-lt:#e8c96a; --gold-glow:rgba(201,168,76,.2);
+  --vio:#7c3aed; --vio-lt:#a855f7;
+  --txt:#f1f5f9; --txt2:#94a3b8; --txt3:#475569;
+  --bdr:rgba(201,168,76,.13); --bdr-h:rgba(201,168,76,.4);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);overflow-x:hidden;line-height:1.65;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
+
+/* ── PARTICLES ─────────────────────────── */
+#canvas{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.45;}
+
+/* ── PROGRESS ──────────────────────────── */
+#prog{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,var(--gold),var(--vio-lt));z-index:300;box-shadow:0 0 12px var(--gold);transition:width .12s linear;}
+
+/* ── NAV ───────────────────────────────── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:1.1rem 4rem;background:rgba(5,8,16,.7);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);transition:padding .3s,background .3s;}
+nav.scrolled{padding:.8rem 4rem;background:rgba(5,8,16,.96);}
+.logo{display:flex;align-items:center;text-decoration:none;cursor:pointer;}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;color:var(--txt);letter-spacing:-.01em;}
+.logo-text span{color:var(--gold);}
+.nav-links{display:flex;align-items:center;gap:1.8rem;list-style:none;}
+.nav-links a{color:var(--txt2);text-decoration:none;font-size:.88rem;font-weight:500;cursor:pointer;transition:color .2s;}
+.nav-links a:hover{color:var(--gold);}
+.nav-cta{background:linear-gradient(135deg,var(--gold),#9a6e10)!important;color:#050810!important;padding:.5rem 1.3rem!important;border-radius:50px;font-weight:700!important;box-shadow:0 0 18px rgba(201,168,76,.3);transition:box-shadow .3s,transform .3s!important;}
+.nav-cta:hover{box-shadow:0 0 34px rgba(201,168,76,.6)!important;transform:translateY(-1px)!important;}
+.nav-quiz{color:var(--vio-lt)!important;border:1px solid rgba(168,85,247,.3);border-radius:50px;padding:.38rem 1rem!important;transition:all .25s!important;}
+.nav-quiz:hover{background:rgba(168,85,247,.12)!important;border-color:var(--vio-lt)!important;}
+/* Hamburger button — mobile only */
+.nav-ham{display:none;flex-direction:column;justify-content:center;gap:5px;background:none;border:1px solid var(--bdr);border-radius:10px;padding:.5rem .65rem;cursor:pointer;width:42px;height:42px;}
+.ham-line{display:block;width:18px;height:1.5px;background:var(--txt);border-radius:2px;transition:transform .3s ease,opacity .3s ease,width .3s ease;}
+.nav-ham.open .ham-line:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
+.nav-ham.open .ham-line:nth-child(2){opacity:0;width:0;}
+.nav-ham.open .ham-line:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
+
+/* Mobile menu overlay */
+#mobile-menu{position:fixed;inset:0;z-index:400;pointer-events:none;}
+#mobile-menu.open{pointer-events:all;}
+.mm-backdrop{position:absolute;inset:0;background:rgba(5,8,16,.75);backdrop-filter:blur(8px);opacity:0;transition:opacity .35s ease;}
+#mobile-menu.open .mm-backdrop{opacity:1;}
+
+.mm-panel{
+  position:absolute;top:0;right:0;bottom:0;
+  width:min(320px,85vw);
+  background:var(--bg-card2);
+  border-left:1px solid var(--bdr);
+  display:flex;flex-direction:column;
+  transform:translateX(100%);
+  transition:transform .38s cubic-bezier(.34,1.1,.64,1);
+  box-shadow:-20px 0 60px rgba(0,0,0,.5);
+}
+#mobile-menu.open .mm-panel{transform:translateX(0);}
+
+.mm-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.4rem 1.6rem;
+  border-bottom:1px solid var(--bdr);
+  flex-shrink:0;
+}
+.mm-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--txt2);}
+.mm-logo span{color:var(--gold);}
+.mm-close{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid var(--bdr);color:var(--txt2);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.mm-close:hover{background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold);}
+
+.mm-links{flex:1;display:flex;flex-direction:column;padding:1.2rem 1rem;gap:.5rem;}
+.mm-link{
+  display:flex;align-items:center;gap:1rem;
+  padding:1rem 1.2rem;border-radius:14px;
+  color:var(--txt);font-size:1rem;font-weight:500;
+  cursor:pointer;text-decoration:none;
+  border:1px solid transparent;
+  transition:background .2s,border-color .2s,color .2s;
+}
+.mm-link:hover{background:rgba(201,168,76,.07);border-color:var(--bdr-h);color:var(--gold);}
+.mm-link-icon{font-size:1.2rem;width:28px;text-align:center;flex-shrink:0;}
+.mm-link span:nth-child(2){flex:1;}
+.mm-link-arrow{font-size:.85rem;color:var(--txt3);transition:transform .2s,color .2s;}
+.mm-link:hover .mm-link-arrow{transform:translateX(4px);color:var(--gold);}
+
+.mm-link-quiz{color:var(--vio-lt)!important;}
+.mm-link-quiz:hover{background:rgba(168,85,247,.1)!important;border-color:rgba(168,85,247,.3)!important;}
+
+.mm-link-cta{
+  background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.08));
+  border-color:rgba(201,168,76,.25)!important;
+  margin-top:.5rem;
+}
+.mm-link-cta:hover{background:linear-gradient(135deg,rgba(201,168,76,.25),rgba(201,168,76,.15))!important;}
+
+.mm-footer{padding:1.2rem 1.6rem;border-top:1px solid var(--bdr);font-size:.75rem;color:var(--txt3);}
+
+/* ── HERO ───────────────────────────────── */
+.hero{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8rem 2rem 6rem;width:100%;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 55% at 50% 25%,rgba(124,58,237,.14) 0%,transparent 65%),radial-gradient(ellipse 50% 40% at 10% 80%,rgba(37,99,235,.1) 0%,transparent 60%),radial-gradient(ellipse 40% 35% at 90% 60%,rgba(201,168,76,.08) 0%,transparent 55%);pointer-events:none;}
+
+.hero-badge{display:inline-flex;align-items:center;gap:.55rem;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.28);border-radius:50px;padding:.42rem 1.15rem;font-size:.76rem;font-weight:600;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2.4rem;animation:fadeUp .8s ease both;}
+.hero-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+h1.hero-title{
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:clamp(3.2rem,8.5vw,8rem);
+  font-weight:600;line-height:1.05;letter-spacing:-.01em;
+  max-width:980px;width:100%;text-align:center;
+  animation:fadeUp .9s .1s ease both;
+}
+.ag{
+  display:block;text-align:center;
+  background:linear-gradient(135deg,var(--gold-lt),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{max-width:520px;margin:2rem auto 0;font-size:1.07rem;color:var(--txt2);font-weight:300;line-height:1.82;animation:fadeUp 1s .25s ease both;}
+.hero-btns{display:flex;align-items:center;gap:1.2rem;margin-top:3.2rem;flex-wrap:wrap;justify-content:center;animation:fadeUp 1s .4s ease both;}
+
+.btn{display:inline-flex;align-items:center;gap:.5rem;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.98rem;padding:.9rem 2.4rem;border-radius:50px;cursor:pointer;text-decoration:none;border:none;transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .35s;}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#9a6e10);color:#050810;box-shadow:0 0 28px rgba(201,168,76,.4),0 4px 20px rgba(0,0,0,.4);}
+.btn-gold:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 0 52px rgba(201,168,76,.6),0 8px 32px rgba(0,0,0,.5);}
+.btn-ghost{background:transparent;color:var(--txt);border:1px solid var(--bdr-h);backdrop-filter:blur(8px);}
+.btn-ghost:hover{background:rgba(201,168,76,.07);border-color:var(--gold);color:var(--gold);transform:translateY(-2px);box-shadow:none;}
+
+.hero-stats{display:flex;gap:4rem;margin-top:5rem;flex-wrap:wrap;justify-content:center;animation:fadeUp 1s .55s ease both;}
+.stat{text-align:center;}
+.stat-n{font-family:'Syne',sans-serif;font-size:2.1rem;font-weight:800;background:linear-gradient(135deg,var(--gold-lt),var(--vio-lt));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-l{font-size:.76rem;color:var(--txt3);letter-spacing:.07em;text-transform:uppercase;margin-top:.2rem;}
+.hero-scroll{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);opacity:.35;pointer-events:none;}
+.scroll-line{width:1px;height:54px;background:linear-gradient(to bottom,transparent,var(--gold));margin:0 auto;animation:sa 2s infinite;}
+@keyframes sa{0%,100%{opacity:.25}50%{opacity:1}}
+
+/* ── SHARED ─────────────────────────────── */
+.sec-header{text-align:center;margin-bottom:5rem;}
+.sec-tag{display:inline-flex;align-items:center;gap:.5rem;font-size:.73rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:1rem;}
+.sec-tag::before{content:'';width:22px;height:1px;background:var(--gold);}
+h2.sec-title{font-family:'Syne',sans-serif;font-size:clamp(2.1rem,4vw,3.4rem);font-weight:800;line-height:1.1;letter-spacing:-.022em;margin-bottom:1.2rem;}
+.sec-desc{color:var(--txt2);max-width:500px;margin:0 auto;font-size:.98rem;line-height:1.8;}
+
+/* ── CHAPTER GRID ───────────────────────── */
+#chapitres{position:relative;z-index:1;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.75rem;}
+
+.card{background:var(--bg-card);border:1px solid var(--bdr);border-radius:22px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;transition:transform .4s cubic-bezier(.34,1.2,.64,1),box-shadow .4s,border-color .3s;}
+.card:hover{transform:translateY(-9px) scale(1.01);border-color:var(--bdr-h);box-shadow:0 24px 65px rgba(0,0,0,.55),0 0 45px var(--gold-glow);}
+.card-img{width:100%;height:185px;overflow:hidden;position:relative;background:#080f20;flex-shrink:0;}
+.card-img img{width:100%;height:100%;object-fit:cover;filter:brightness(.8) saturate(1.1);transition:transform .55s ease;}
+.card:hover .card-img img{transform:scale(1.08);}
+.card-img-fb{position:absolute;inset:0;background:linear-gradient(135deg,#060e24,#100820);display:none;align-items:center;justify-content:center;font-size:3rem;}
+.card-img-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(5,8,16,.05),rgba(5,8,16,.6));}
+.card-num{position:absolute;top:14px;left:14px;font-family:'Syne',sans-serif;font-size:.66rem;font-weight:700;color:var(--gold);letter-spacing:.13em;text-transform:uppercase;background:rgba(5,8,16,.7);backdrop-filter:blur(8px);border:1px solid rgba(201,168,76,.28);border-radius:50px;padding:.22rem .78rem;}
+.card-ico{position:absolute;bottom:13px;right:14px;font-size:1.6rem;filter:drop-shadow(0 2px 10px rgba(0,0,0,.65));}
+.card-body{padding:1.6rem;display:flex;flex-direction:column;gap:.8rem;flex:1;}
+.card-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--txt);line-height:1.3;}
+.card-desc{font-size:.86rem;color:var(--txt2);line-height:1.68;flex:1;}
+.card-foot{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.4rem;}
+.card-tags{display:flex;flex-wrap:wrap;gap:.3rem;}
+.tag{font-size:.68rem;padding:.18rem .62rem;border-radius:50px;background:rgba(201,168,76,.09);border:1px solid rgba(201,168,76,.2);color:var(--gold);font-weight:500;}
+.card-arr{width:32px;height:32px;border-radius:50%;flex-shrink:0;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.22);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:.95rem;transition:all .3s;}
+.card:hover .card-arr{background:var(--gold);color:#050810;transform:rotate(45deg);}
+
+/* ── FEATURES ───────────────────────────── */
+.features-wrap{position:relative;z-index:1;padding:0 4rem 7rem;max-width:1400px;margin:0 auto;}
+.features-box{background:var(--bg-card);border:1px solid var(--bdr);border-radius:28px;padding:3.5rem 4rem;display:grid;grid-template-columns:repeat(4,1fr);gap:2.5rem;position:relative;overflow:hidden;}
+.features-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold) 30%,var(--vio-lt) 70%,transparent);}
+.feat{display:flex;flex-direction:column;gap:.8rem;}
+.feat-ico{font-size:1.9rem;}
+.feat-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;}
+.feat-desc{font-size:.85rem;color:var(--txt2);line-height:1.65;}
+
+/* ── CTA ────────────────────────────────── */
+.cta-wrap{position:relative;z-index:1;padding:0 4rem 9rem;max-width:880px;margin:0 auto;text-align:center;}
+.cta-box{background:var(--bg-card);border:1px solid var(--bdr);border-radius:32px;padding:5rem 3rem;position:relative;overflow:hidden;}
+.cta-box::before{content:'';position:absolute;top:-90px;left:50%;transform:translateX(-50%);width:480px;height:480px;background:radial-gradient(circle,rgba(201,168,76,.1),transparent 70%);pointer-events:none;}
+.cta-box::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),var(--vio-lt),transparent);}
+.cta-title{font-family:'Syne',sans-serif;font-size:clamp(1.9rem,3.5vw,2.9rem);font-weight:800;margin-bottom:1.2rem;position:relative;}
+.cta-sub{color:var(--txt2);max-width:450px;margin:0 auto 3rem;line-height:1.82;position:relative;}
+
+/* ── FOOTER ─────────────────────────────── */
+footer{position:relative;z-index:1;border-top:1px solid var(--bdr);padding:2.4rem 4rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.foot-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--txt2);}
+.foot-logo span{color:var(--gold);}
+.foot-copy{font-size:.8rem;color:var(--txt3);}
+
+/* ── CHAPTER FULL PAGE ──────────────────── */
+#chapter-page{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .45s ease;overflow:hidden;}
+#chapter-page.open{opacity:1;pointer-events:all;}
+.cp-inner{transition:opacity .25s ease,transform .28s ease;}
+.cp-inner.fading{opacity:0;transform:translateY(12px);}
+
+.cp-topbar{position:sticky;top:0;z-index:10;background:rgba(5,8,16,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);padding:0 4rem;display:flex;align-items:center;justify-content:space-between;height:64px;flex-shrink:0;}
+.cp-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--txt2);cursor:pointer;transition:color .2s;}
+.cp-logo:hover{color:var(--txt);}
+.cp-logo span{color:var(--gold);}
+.cp-nav-btns{display:flex;align-items:center;gap:.8rem;}
+.cp-arrow-btn{width:38px;height:38px;border-radius:50%;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);color:var(--gold);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;}
+.cp-arrow-btn:hover{background:rgba(201,168,76,.2);border-color:var(--gold);}
+.cp-arrow-btn:disabled{opacity:.25;cursor:default;}
+.cp-counter{font-size:.8rem;color:var(--txt3);font-weight:500;padding:0 .5rem;}
+.cp-close{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid var(--bdr);color:var(--txt2);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;margin-left:.8rem;}
+.cp-close:hover{background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold);}
+
+#cp-scroll{flex:1;overflow-y:auto;scroll-behavior:smooth;}
+#cp-scroll::-webkit-scrollbar{width:4px;}
+#cp-scroll::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
+
+.cp-hero-img{width:100%;height:380px;position:relative;overflow:hidden;flex-shrink:0;}
+.cp-hero-img img{width:100%;height:100%;object-fit:cover;filter:brightness(.65) saturate(1.1);}
+.cp-hero-fb{width:100%;height:100%;background:linear-gradient(135deg,#060e24,#0f1d3a 50%,#180930);display:flex;align-items:center;justify-content:center;font-size:5rem;position:absolute;inset:0;}
+.cp-hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(5,8,16,0) 30%,rgba(5,8,16,1) 100%);}
+.cp-hero-content{position:absolute;bottom:0;left:0;right:0;padding:3rem 6rem 3.5rem;}
+.cp-chapter-tag{display:inline-block;font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;background:rgba(5,8,16,.6);backdrop-filter:blur(8px);border:1px solid rgba(201,168,76,.3);border-radius:50px;padding:.3rem .9rem;margin-bottom:1.2rem;}
+.cp-main-title{font-family:'Syne',sans-serif;font-size:clamp(2rem,4.5vw,3.5rem);font-weight:800;line-height:1.1;letter-spacing:-.02em;color:var(--txt);}
+
+.cp-body{max-width:820px;margin:0 auto;padding:5rem 4rem 6rem;}
+.cp-intro{font-size:1.12rem;color:var(--txt2);line-height:1.9;padding:2rem 2.2rem;background:rgba(201,168,76,.05);border-left:3px solid var(--gold);border-radius:0 16px 16px 0;margin-bottom:5rem;}
+.cp-section{margin-bottom:4.5rem;}
+.cp-section-title{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:700;color:var(--txt);margin-bottom:2rem;display:flex;align-items:center;gap:.8rem;}
+.cp-section-title .sec-num{width:32px;height:32px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,rgba(201,168,76,.2),rgba(124,58,237,.15));border:1px solid rgba(201,168,76,.25);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--gold);}
+.cp-section-title .sec-line{flex:1;height:1px;background:linear-gradient(90deg,var(--bdr),transparent);}
+.cp-items{display:flex;flex-direction:column;gap:1.4rem;}
+.cp-item{display:flex;align-items:flex-start;gap:1.2rem;padding:1.4rem 1.6rem;background:var(--bg-card);border:1px solid var(--bdr);border-radius:16px;transition:border-color .3s,box-shadow .3s;}
+.cp-item:hover{border-color:rgba(201,168,76,.25);box-shadow:0 4px 20px rgba(0,0,0,.3);}
+.cp-item-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold-glow);margin-top:.45rem;flex-shrink:0;}
+.cp-item-text{font-size:.96rem;color:var(--txt2);line-height:1.72;}
+.hl{color:var(--gold);font-weight:600;}
+.cp-tip{margin-top:4rem;padding:2rem 2.2rem;background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.22);border-radius:20px;display:flex;gap:1.2rem;font-size:.96rem;color:var(--txt2);line-height:1.78;}
+.cp-tip-ico{font-size:1.5rem;flex-shrink:0;}
+
+.cp-footer-nav{border-top:1px solid var(--bdr);padding:2.5rem 4rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-shrink:0;background:rgba(5,8,16,.8);backdrop-filter:blur(16px);}
+.cp-footer-nav .btn{padding:.75rem 2rem;font-size:.92rem;}
+
+/* ── FAQ ACCORDION ──────────────────────── */
+.cp-faq{margin-top:4rem;}
+.faq-title{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:700;color:var(--txt);margin-bottom:2rem;display:flex;align-items:center;gap:.8rem;}
+.faq-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--bdr),transparent);}
+.faq-item{border:1px solid var(--bdr);border-radius:16px;margin-bottom:1rem;overflow:hidden;transition:border-color .3s,box-shadow .3s;}
+.faq-item.open{border-color:rgba(201,168,76,.35);box-shadow:0 4px 24px rgba(0,0,0,.3);}
+.faq-q{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.3rem 1.6rem;cursor:pointer;font-size:.97rem;font-weight:500;color:var(--txt);user-select:none;transition:background .2s;}
+.faq-q:hover{background:rgba(201,168,76,.04);}
+.faq-icon{width:28px;height:28px;border-radius:50%;flex-shrink:0;border:1px solid rgba(201,168,76,.25);background:rgba(201,168,76,.08);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:.85rem;transition:transform .35s ease,background .3s,color .3s;}
+.faq-item.open .faq-icon{transform:rotate(45deg);background:var(--gold);color:#050810;border-color:var(--gold);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.4,0,.2,1);}
+.faq-item.open .faq-a{max-height:350px;}
+.faq-a-inner{margin:0 1.6rem 1.5rem;font-size:.93rem;color:var(--txt2);line-height:1.82;padding:1.1rem 1.3rem;background:rgba(201,168,76,.04);border-left:2px solid var(--gold);border-radius:0 10px 10px 0;}
+
+/* ── QUIZ PAGE ──────────────────────────── */
+#quiz-page{position:fixed;inset:0;z-index:600;background:var(--bg);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .5s ease,transform .5s cubic-bezier(.34,1.1,.64,1);transform:translateY(30px) scale(.98);overflow:hidden;}
+#quiz-page.open{opacity:1;pointer-events:all;transform:translateY(0) scale(1);}
+
+.quiz-topbar{display:flex;align-items:center;justify-content:space-between;padding:0 4rem;height:64px;flex-shrink:0;background:rgba(5,8,16,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);}
+.quiz-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--txt2);cursor:pointer;transition:color .2s;}
+.quiz-logo:hover{color:var(--txt);}
+.quiz-logo span{color:var(--gold);}
+.quiz-meta{display:flex;align-items:center;gap:1.2rem;}
+.quiz-score-wrap{display:flex;align-items:center;gap:.5rem;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:50px;padding:.3rem 1rem;}
+.quiz-score-label{font-size:.78rem;color:var(--txt3);}
+.quiz-score-val{font-family:'Syne',sans-serif;font-weight:700;color:var(--gold);font-size:.95rem;min-width:36px;text-align:center;}
+.quiz-close-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid var(--bdr);color:var(--txt2);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;}
+.quiz-close-btn:hover{background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold);}
+
+.quiz-scroll{flex:1;overflow-y:auto;padding:4rem;}
+.quiz-scroll::-webkit-scrollbar{width:4px;}
+.quiz-scroll::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
+.quiz-header{text-align:center;margin-bottom:4rem;}
+.quiz-header h2{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;margin-bottom:1rem;}
+.quiz-header p{color:var(--txt2);max-width:500px;margin:0 auto;line-height:1.75;}
+
+.quiz-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:1000px;margin:0 auto;}
+
+.q-card{background:var(--bg-card);border:1px solid var(--bdr);border-radius:20px;padding:2rem;display:flex;flex-direction:column;gap:1.2rem;transition:border-color .3s,box-shadow .3s;opacity:0;transform:translateY(20px);}
+.q-card.correct{border-color:rgba(34,197,94,.5);box-shadow:0 0 24px rgba(34,197,94,.1);}
+.q-card.wrong{border-color:rgba(239,68,68,.4);box-shadow:0 0 20px rgba(239,68,68,.08);}
+.q-chip{display:inline-flex;align-items:center;gap:.4rem;font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--vio-lt);background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.2);border-radius:50px;padding:.2rem .75rem;width:fit-content;}
+.q-text{font-size:.98rem;color:var(--txt);font-weight:500;line-height:1.55;}
+.q-input-wrap{display:flex;gap:.7rem;}
+.q-input{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:12px;padding:.75rem 1.1rem;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:.94rem;outline:none;transition:border-color .25s,box-shadow .25s;}
+.q-input:focus{border-color:rgba(201,168,76,.5);box-shadow:0 0 0 3px rgba(201,168,76,.08);}
+.q-input.correct{border-color:rgba(34,197,94,.6);background:rgba(34,197,94,.05);}
+.q-input.wrong{border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.05);}
+.q-input:disabled{opacity:.7;cursor:default;}
+.q-submit{background:linear-gradient(135deg,var(--gold),#9a6e10);color:#050810;border:none;border-radius:12px;padding:.75rem 1.3rem;font-weight:700;font-size:.88rem;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:transform .25s,box-shadow .25s;}
+.q-submit:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(201,168,76,.35);}
+.q-submit:disabled{opacity:.5;cursor:default;transform:none;}
+.q-feedback{font-size:.86rem;line-height:1.65;padding:.9rem 1.1rem;border-radius:10px;display:none;}
+.q-feedback.show{display:block;}
+.q-feedback.correct-fb{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);color:#86efac;}
+.q-feedback.wrong-fb{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);color:#fca5a5;}
+
+/* ── CONFETTI ───────────────────────────── */
+#confetti-canvas{position:fixed;inset:0;z-index:900;pointer-events:none;opacity:0;transition:opacity .3s;}
+#confetti-canvas.active{opacity:1;}
+.success-flash{position:fixed;inset:0;z-index:899;background:radial-gradient(ellipse at center,rgba(201,168,76,.18) 0%,transparent 70%);pointer-events:none;opacity:0;transition:opacity .4s;}
+.success-flash.active{opacity:1;}
+
+/* ── ANIMATIONS ─────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.v{opacity:1;transform:translateY(0);}
+
+/* ── RESPONSIVE ─────────────────────────── */
+@media(max-width:1100px){
+  nav,nav.scrolled{padding:.9rem 2rem;}
+  .nav-links{display:none;}
+  .nav-ham{display:flex;}
+  .features-box{grid-template-columns:repeat(2,1fr);padding:2.5rem 2rem;}
+  .features-wrap{padding:0 1.5rem 5rem;}
+  .cta-wrap{padding:0 1.5rem 7rem;}
+  footer{padding:2rem 1.5rem;}
+  .cp-topbar{padding:0 1.5rem;}
+  .cp-hero-content{padding:2rem 2rem 2.5rem;}
+  .cp-body{padding:3.5rem 2rem 5rem;}
+  .cp-footer-nav{padding:1.8rem 2rem;}
+  .quiz-topbar{padding:0 1.5rem;}
+  .quiz-scroll{padding:2.5rem 1.5rem;}
+  .quiz-grid{grid-template-columns:1fr;}
+  #chapitres{padding:5rem 1.5rem!important;}
+}
+@media(max-width:700px){
+  .grid{grid-template-columns:1fr;}
+  .features-box{grid-template-columns:1fr;}
+  .hero-stats{gap:2.5rem;}
+  .cp-hero-img{height:260px;}
+  .cp-main-title{font-size:1.8rem;}
+  .cp-body{padding:3rem 1.5rem 5rem;}
+  .cp-footer-nav{flex-direction:column;}
+  .cp-footer-nav .btn{width:100%;justify-content:center;}
+  .cta-box{padding:3.5rem 1.5rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- Effects -->
+<div id="prog"></div>
+<canvas id="canvas"></canvas>
+<canvas id="confetti-canvas"></canvas>
+<div class="success-flash" id="success-flash"></div>
+
+<!-- ── NAV ──────────────────────────────── -->
+<nav id="navbar">
+  <a class="logo" onclick="goHome()">
+    <span class="logo-text">Glory<span>Trading</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a onclick="scrollToSection('chapitres')">Chapitres</a></li>
+    <li><a onclick="openQuiz()" class="nav-quiz">✦ Me tester</a></li>
+    <li><a class="nav-cta" onclick="openChapter(0)">Commencer →</a></li>
+  </ul>
+  <button class="nav-ham" id="nav-ham-btn" onclick="toggleMobileMenu()">
+    <span class="ham-line"></span>
+    <span class="ham-line"></span>
+    <span class="ham-line"></span>
+  </button>
+</nav>
+
+<!-- ── MOBILE MENU ────────────────────────── -->
+<div id="mobile-menu">
+  <div class="mm-backdrop" onclick="closeMobileMenu()"></div>
+  <div class="mm-panel">
+    <div class="mm-header">
+      <span class="mm-logo">Glory<span>Trading</span></span>
+      <button class="mm-close" onclick="closeMobileMenu()">✕</button>
+    </div>
+    <nav class="mm-links">
+      <a class="mm-link" onclick="closeMobileMenu();scrollToSection('chapitres')">
+        <span class="mm-link-icon">📚</span>
+        <span>Chapitres</span>
+        <span class="mm-link-arrow">→</span>
+      </a>
+      <a class="mm-link mm-link-quiz" onclick="closeMobileMenu();openQuiz()">
+        <span class="mm-link-icon">✦</span>
+        <span>Me tester</span>
+        <span class="mm-link-arrow">→</span>
+      </a>
+      <a class="mm-link mm-link-cta" onclick="closeMobileMenu();openChapter(0)">
+        <span class="mm-link-icon">🚀</span>
+        <span>Commencer</span>
+        <span class="mm-link-arrow">→</span>
+      </a>
+    </nav>
+    <div class="mm-footer">
+      <span>© 2025 Glory Trading · Formation Premium</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── HERO ─────────────────────────────── -->
+<section class="hero">
+  <div class="hero-badge">Plateforme de formation premium · Analyse technique</div>
+  <h1 class="hero-title">
+    Vise plus haut que
+    <span class="ag">le sommet</span>
+  </h1>
+  <p class="hero-sub">Maîtrisez l'analyse technique, les Smart Money Concepts et la gestion du risque. Une formation structurée pour trader avec conviction et discipline.</p>
+  <div class="hero-btns">
+    <a class="btn btn-gold" onclick="openChapter(0)">✦ Commencer maintenant</a>
+    <a class="btn btn-ghost" onclick="scrollToSection('chapitres')">↓ Voir les chapitres</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-n">12</div><div class="stat-l">Chapitres</div></div>
+    <div class="stat"><div class="stat-n">60+</div><div class="stat-l">Concepts</div></div>
+    <div class="stat"><div class="stat-n">100%</div><div class="stat-l">Gratuit</div></div>
+    <div class="stat"><div class="stat-n">Pro</div><div class="stat-l">Niveau</div></div>
+  </div>
+  <div class="hero-scroll"><div class="scroll-line"></div></div>
+</section>
+
+<!-- ── CHAPTERS GRID ─────────────────────── -->
+<section id="chapitres" style="position:relative;z-index:1;padding:8rem 4rem;">
+  <div style="max-width:1400px;margin:0 auto;">
+    <div class="sec-header reveal">
+      <div class="sec-tag">Programme complet</div>
+      <h2 class="sec-title">Tous les chapitres</h2>
+      <p class="sec-desc">De l'initiation aux concepts institutionnels avancés, chaque chapitre construit votre expertise pas à pas.</p>
+    </div>
+    <div class="grid reveal" id="grid"></div>
+  </div>
+</section>
+
+<!-- ── FEATURES ──────────────────────────── -->
+<div class="features-wrap">
+  <div class="features-box reveal">
+    <div class="feat"><div class="feat-ico">📊</div><div class="feat-title">Analyse technique complète</div><div class="feat-desc">Des bases aux configurations avancées utilisées par les traders institutionnels.</div></div>
+    <div class="feat"><div class="feat-ico">🧠</div><div class="feat-title">Smart Money Concepts</div><div class="feat-desc">Comprenez les mouvements des grands acteurs du marché et anticipez leurs actions.</div></div>
+    <div class="feat"><div class="feat-ico">🛡️</div><div class="feat-title">Gestion du risque</div><div class="feat-desc">Protégez votre capital avec des méthodes éprouvées de stop-loss et position sizing.</div></div>
+    <div class="feat"><div class="feat-ico">⚡</div><div class="feat-title">Applicable immédiatement</div><div class="feat-desc">Chaque concept illustré avec des exemples concrets sur des graphiques réels.</div></div>
+  </div>
+</div>
+
+<!-- ── CTA ───────────────────────────────── -->
+<div class="cta-wrap">
+  <div class="cta-box reveal">
+    <div class="cta-title">Prêt à franchir un nouveau palier ?</div>
+    <p class="cta-sub">Rejoignez des milliers d'apprenants qui ont transformé leur approche du trading.</p>
+    <a class="btn btn-gold" onclick="openChapter(0)">✦ Commencer le chapitre 1</a>
+  </div>
+</div>
+
+<!-- ── FOOTER ─────────────────────────────── -->
+<footer>
+  <div class="foot-logo">Glory<span>Trading</span></div>
+  <div class="foot-copy">© 2025 Glory Trading · Formation Trading Premium</div>
+</footer>
+
+<!-- ── CHAPTER FULL PAGE ──────────────────── -->
+<div id="chapter-page">
+  <div class="cp-topbar">
+    <div class="cp-logo" onclick="closeChapter()">Glory<span>Trading</span></div>
+    <div class="cp-nav-btns">
+      <button class="cp-arrow-btn" id="btn-prev" onclick="prevChapter()">←</button>
+      <span class="cp-counter" id="cp-counter">1 / 12</span>
+      <button class="cp-arrow-btn" id="btn-next" onclick="nextChapter()">→</button>
+      <button class="cp-close" onclick="closeChapter()">✕</button>
+    </div>
+  </div>
+  <div id="cp-scroll">
+    <div class="cp-inner" id="cp-inner">
+      <div class="cp-hero-img">
+        <img id="cp-img" src="" alt="">
+        <div id="cp-img-fb" class="cp-hero-fb" style="display:none;"></div>
+        <div class="cp-hero-overlay"></div>
+        <div class="cp-hero-content">
+          <div class="cp-chapter-tag" id="cp-tag"></div>
+          <div class="cp-main-title" id="cp-title"></div>
+        </div>
+      </div>
+      <div class="cp-body" id="cp-body"></div>
+    </div>
+  </div>
+  <div class="cp-footer-nav">
+    <button class="btn btn-ghost" id="fp-prev" onclick="prevChapter()">← Précédent</button>
+    <button class="btn btn-ghost" onclick="closeChapter()">✕ Fermer</button>
+    <button class="btn btn-gold" id="fp-next" onclick="nextChapter()">Suivant →</button>
+  </div>
+</div>
+
+<!-- ── QUIZ PAGE ──────────────────────────── -->
+<div id="quiz-page">
+  <div class="quiz-topbar">
+    <div class="quiz-logo" onclick="closeQuiz()">Glory<span>Trading</span></div>
+    <div class="quiz-meta">
+      <div class="quiz-score-wrap">
+        <span class="quiz-score-label">Score</span>
+        <span class="quiz-score-val" id="quiz-score">0 / 0</span>
+      </div>
+      <button class="quiz-close-btn" onclick="closeQuiz()">✕</button>
+    </div>
+  </div>
+  <div class="quiz-scroll">
+    <div class="quiz-header">
+      <div class="sec-tag">Entraînement</div>
+      <h2>Me tester</h2>
+      <p>Toutes les notions des 12 chapitres mélangées. Tape ta réponse et appuie sur <strong style="color:var(--gold)">Valider</strong> ou Entrée.</p>
+    </div>
+    <div class="quiz-grid" id="quiz-grid"></div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   CHAPTERS DATA
+════════════════════════════════════════ */
+const CH = [
+  {
+    n:"01",ic:"📈",title:"Fondamentaux de l'Analyse Technique",
+    desc:"Comprendre les bases du trading, les types de graphiques et la lecture des chandeliers japonais OHLC.",
+    tags:["Débutant","Graphiques","OHLC"],
+    img:"https://i0.wp.com/alchemymarkets.com/wp-content/uploads/2024/01/Untitled-1-3.png?fit=1000%2C800&ssl=1",
+    intro:"L'analyse technique étudie les mouvements de prix passés pour prévoir les tendances futures. C'est le socle indispensable de tout trader performant sur n'importe quel marché.",
+    sections:[
+      {t:"Introduction au Trading",items:[
+        "<span class='hl'>Qu'est-ce que le trading ?</span> C'est l'achat et la vente d'actifs financiers (actions, crypto, forex) dans le but de réaliser un profit sur la différence de prix entre l'entrée et la sortie de position.",
+        "<span class='hl'>Trading vs Investissement</span> : le trading vise des gains à court/moyen terme avec une gestion active, tandis que l'investissement mise sur la croissance long terme sans intervention fréquente.",
+        "<span class='hl'>Les marchés principaux</span> : Crypto (Bitcoin, Ethereum…), Forex (EUR/USD…), Actions (Apple, Tesla…), Matières premières (Or, Pétrole…). Chacun a ses particularités de volatilité et d'horaires.",
+        "<span class='hl'>Bid / Ask</span> : le Bid est le prix auquel le marché achète votre actif, le Ask est le prix auquel il vous le vend. La différence entre les deux est le spread — le coût implicite de chaque transaction."
+      ]},
+      {t:"Types de graphiques",items:[
+        "<span class='hl'>Graphique en ligne</span> — relie uniquement les prix de clôture. Simple, lisible, idéal pour voir la tendance globale sans le bruit des variations intra-période.",
+        "<span class='hl'>Graphique en barres (OHLC)</span> — chaque barre affiche 4 données : Open, High, Low, Close. Permet une lecture fine de chaque période.",
+        "<span class='hl'>Chandeliers japonais</span> — mêmes données que l'OHLC mais visuellement intuitifs : le corps représente l'écart O/C, les mèches les extrêmes H/L. Standard universel des traders.",
+        "<span class='hl'>Choisir son graphique</span> : les chandeliers japonais sont le choix numéro un. Le graphique en ligne reste utile pour tracer des niveaux propres sur des timeframes élevés."
+      ]},
+      {t:"Unités de temps (Timeframes)",items:[
+        "<span class='hl'>Scalping</span> : M1, M5, M15 — positions ultra-courtes de quelques minutes. Attention constante requise, spreads faibles indispensables.",
+        "<span class='hl'>Day trading</span> : H1, H4 — toutes les positions ouvertes et fermées dans la journée. Aucune exposition au risque de gap overnight.",
+        "<span class='hl'>Swing trading</span> : D1, W1 — positions maintenues de quelques jours à plusieurs semaines. Analyse quotidienne de 15-30 minutes suffisante.",
+        "<span class='hl'>Multi-timeframe (MTF)</span> : la méthode des pros. D1 → contexte macro, H4 → setup, H1 → entrée précise. Chaque timeframe doit être aligné avec le supérieur."
+      ]}
+    ],
+    faq:[
+      {q:"Quelle est la différence entre le trading et l'investissement ?",a:"Le trading cherche à profiter des fluctuations de prix à court ou moyen terme, avec des entrées/sorties fréquentes. L'investissement consiste à acheter un actif pour le conserver longtemps, en pariant sur sa croissance fondamentale. Un trader peut gérer des dizaines de positions par semaine, là où un investisseur garde la même position pendant des années."},
+      {q:"Que signifient Open, High, Low et Close (OHLC) ?",a:"Open = prix d'ouverture de la période. High = prix le plus haut atteint. Low = prix le plus bas atteint. Close = prix de clôture. Si Close > Open, la bougie est verte (haussière). Si Close < Open, elle est rouge (baissière). Le corps du chandelier représente l'écart O/C, les mèches représentent le H et le L."},
+      {q:"Pourquoi utiliser plusieurs timeframes simultanément ?",a:"Parce que chaque timeframe raconte une partie de l'histoire. Le D1 donne le contexte macro et la tendance de fond. Le H4 permet d'identifier le setup. Le H1 précise l'entrée. Un signal sur H1 qui s'oppose à une résistance majeure sur D1 est de mauvaise qualité. La confluence entre timeframes augmente significativement la probabilité de succès."},
+      {q:"Quel type de trading me convient le mieux ?",a:"Cela dépend de votre disponibilité. Le scalping demande d'être collé à l'écran des heures — idéal si vous aimez l'action rapide. Le day trading nécessite plusieurs heures de concentration par jour. Le swing trading est parfait si vous avez un emploi, car il ne demande qu'une analyse quotidienne de 15 à 30 minutes. Commencez par le swing trading pour apprendre sans pression temporelle."},
+      {q:"Qu'est-ce que le spread et pourquoi est-il important ?",a:"Le spread est la différence entre le prix d'achat (Ask) et le prix de vente (Bid). Si BTC est coté 50 000 $ Bid / 50 010 $ Ask, le spread est de 10 $. Dès l'ouverture d'un trade, vous êtes déjà en perte de 10 $. En scalping cela est critique. En swing trading le spread est négligeable face aux cibles visées de plusieurs centaines ou milliers de dollars."}
+    ],
+    tip:"💡 Conseil pro : Commencez par le D1 pour le contexte global, le H4 pour identifier le setup, le H1 pour l'entrée précise. Cette hiérarchie descendante est la méthode des traders institutionnels."
+  },
+  {
+    n:"02",ic:"🏗️",title:"Structure du Marché & Price Action",
+    desc:"Identifier les tendances, les supports/résistances et comprendre les phases de marché sans indicateurs.",
+    tags:["Intermédiaire","Tendances","S/R"],
+    img:"https://i0.wp.com/theforexgeek.com/wp-content/uploads/2023/07/uptrend-structure-higher-highs-higher-lows-hhhl.png?resize=1024%2C680&ssl=1",
+    intro:"La price action est l'art de lire le marché uniquement à travers les mouvements de prix, sans indicateurs. Elle révèle les intentions réelles des participants du marché.",
+    sections:[
+      {t:"Tendances et structure",items:[
+        "<span class='hl'>Tendance haussière</span> : Higher Highs (HH) + Higher Lows (HL) — sommets et creux croissants successifs.",
+        "<span class='hl'>Tendance baissière</span> : Lower Lows (LL) + Lower Highs (LH) — sommets et creux décroissants.",
+        "<span class='hl'>Marché en range</span> : oscillation horizontale entre un support et une résistance fixes.",
+        "Identifier le biais directionnel global avant toute recherche d'entrée en position."
+      ]},
+      {t:"Supports & Résistances",items:[
+        "<span class='hl'>Support</span> : zone où la demande dépasse l'offre — le prix rebondit à la hausse.",
+        "<span class='hl'>Résistance</span> : zone où l'offre domine — le prix est rejeté vers le bas.",
+        "<span class='hl'>Retournement de polarité</span> : un support cassé devient résistance et vice versa.",
+        "<span class='hl'>Niveaux psychologiques</span> : prix ronds comme 30 000 $, 50 000 $, 100 000 $ BTC."
+      ]},
+      {t:"Lignes de tendance & Canaux",items:[
+        "Droite haussière tracée sous les plus bas croissants successifs confirmés.",
+        "Droite baissière tracée au-dessus des plus hauts décroissants successifs.",
+        "<span class='hl'>Canal de prix</span> : deux droites parallèles encadrant les oscillations du marché.",
+        "Range trading : acheter au support, vendre à la résistance avec stops logiques."
+      ]}
+    ],
+    tip:"💡 Avant toute entrée : où se situe le prix dans la structure macro ? Avec ou contre la tendance principale ? Cette réponse change absolument tout."
+  },
+  {
+    n:"03",ic:"🕯️",title:"Figures de Chandeliers Japonais",
+    desc:"Maîtriser les patterns haussiers, baissiers et d'indécision pour anticiper les retournements de prix.",
+    tags:["Intermédiaire","Patterns","Chandeliers"],
+    img:"https://assets-global.website-files.com/63f4d36e7817a55a17a55d22/65869d0abd44c3eac42d0c18_Top%205%20Candlestick%20Patterns%20Every%20Trader%20Should%20Know%20-%20Alphachain.jpg",
+    intro:"Les chandeliers japonais transmettent en un coup d'œil la psychologie collective du marché. Chaque pattern raconte une bataille entre acheteurs et vendeurs à un moment précis.",
+    sections:[
+      {t:"Figures Haussières",items:[
+        "<span class='hl'>Marteau (Hammer)</span> — longue mèche basse, corps petit en haut : les acheteurs ont repris le contrôle.",
+        "<span class='hl'>Marteau inversé</span> — potentiel retournement après une baisse prolongée sur un support.",
+        "<span class='hl'>Englobante haussière</span> — grande bougie verte qui avale entièrement la rouge précédente.",
+        "<span class='hl'>Morning Star</span> — constellation 3 bougies : baissière, doji, puis grande haussière.",
+        "<span class='hl'>Trois soldats blancs</span> — 3 longues bougies vertes consécutives, momentum fort."
+      ]},
+      {t:"Figures Baissières",items:[
+        "<span class='hl'>Étoile filante (Shooting Star)</span> — longue mèche haute : les haussiers ont échoué.",
+        "<span class='hl'>Pendu (Hanging Man)</span> — même morphologie que le marteau mais en sommet de tendance.",
+        "<span class='hl'>Englobante baissière</span> — grande bougie rouge qui avale entièrement la verte précédente.",
+        "<span class='hl'>Evening Star</span> — triple chandelier signalant un sommet et un retournement baissier.",
+        "<span class='hl'>Trois corbeaux noirs</span> — 3 longues bougies rouges, momentum baissier puissant."
+      ]},
+      {t:"Figures d'Indécision",items:[
+        "<span class='hl'>Doji</span> — ouverture et clôture quasi identiques : équilibre parfait bulls vs bears.",
+        "<span class='hl'>Doji libellule</span> — longue mèche basse, corps en haut : les acheteurs défendent le niveau.",
+        "<span class='hl'>Doji pierre tombale</span> — longue mèche haute, corps en bas : rejet de la hausse.",
+        "<span class='hl'>Spinning Top</span> — corps petit centré avec mèches des deux côtés : indécision totale."
+      ]}
+    ],
+    tip:"⚠️ Un pattern chandelier isolé ne suffit jamais. Confirmez avec le contexte (structure, niveau clé, volume) avant toute décision."
+  },
+  {
+    n:"04",ic:"🔷",title:"Figures Graphiques Classiques",
+    desc:"Identifier les grandes configurations chartistes de retournement et de continuation du marché.",
+    tags:["Intermédiaire","Chartisme","Patterns"],
+    img:"https://s3.tradingview.com/4/4SRQqQV4_big.png",
+    intro:"Les figures chartistes sont des configurations récurrentes reflétant des dynamiques psychologiques prévisibles entre acheteurs et vendeurs. Elles se reproduisent sur tous les marchés et timeframes.",
+    sections:[
+      {t:"Figures de Retournement",items:[
+        "<span class='hl'>Tête & Épaules</span> — 3 sommets dont le central est plus haut : retournement haussier → baissier.",
+        "<span class='hl'>Tête & Épaules inversée</span> — 3 creux dont le central est plus bas : retournement baissier → haussier.",
+        "<span class='hl'>Double sommet</span> — deux tentatives échouées sur une résistance : signal baissier fort.",
+        "<span class='hl'>Double fond</span> — deux rebonds sur un même support : base solide pour la reprise.",
+        "<span class='hl'>Triple sommet / fond</span> — confirmation supplémentaire avec une troisième tentative."
+      ]},
+      {t:"Figures de Continuation",items:[
+        "<span class='hl'>Flag haussier / baissier</span> — petit canal de consolidation après une forte impulsion.",
+        "<span class='hl'>Pennant</span> — consolidation triangulaire symétrique après une impulsion forte.",
+        "<span class='hl'>Triangle ascendant</span> — résistance horizontale + support montant : breakout haussier probable.",
+        "<span class='hl'>Triangle descendant</span> — support horizontal + résistance descendante : breakout baissier probable.",
+        "<span class='hl'>Wedge (coin)</span> — convergence de deux droites tendancielles dans la même direction."
+      ]}
+    ],
+    tip:"📐 Règle d'or : La cible de prix après un breakout est généralement égale à la hauteur maximale de la figure projetée depuis le point de cassure."
+  },
+  {
+    n:"05",ic:"💎",title:"Smart Money Concepts (SMC)",
+    desc:"Décrypter les stratégies des grands acteurs : liquidité, order blocks, FVG et signaux BOS/CHoCH.",
+    tags:["Avancé","SMC","Institutionnel"],
+    img:"https://forexbee.co/wp-content/uploads/2023/06/Top-9-Smart-Money-Concepts-in-Trading-1024x512.jpg",
+    intro:"Les Smart Money Concepts révèlent comment les institutions — banques, hedge funds — manipulent le marché pour collecter de la liquidité avant leurs vrais mouvements directionnels.",
+    sections:[
+      {t:"La Liquidité",items:[
+        "<span class='hl'>Sell-side liquidity (SSL)</span> — stops des acheteurs sous les plus bas swing : zones chassées par les institutions.",
+        "<span class='hl'>Buy-side liquidity (BSL)</span> — stops des vendeurs au-dessus des plus hauts swing.",
+        "<span class='hl'>Equal Highs / Equal Lows</span> — zones de liquidité concentrée très attractives pour les smart money.",
+        "<span class='hl'>Stop Hunt</span> — mouvement brusque pour déclencher les stops avant de repartir en sens inverse."
+      ]},
+      {t:"Order Blocks (OB)",items:[
+        "<span class='hl'>Bullish OB</span> — dernière bougie baissière avant un fort mouvement haussier institutionnel.",
+        "<span class='hl'>Bearish OB</span> — dernière bougie haussière avant un fort mouvement baissier institutionnel.",
+        "<span class='hl'>Mitigation</span> — retour du prix sur l'OB pour le tester avant de repartir dans la direction initiale.",
+        "Identifier et marquer les OBs sur les niveaux de structure significatifs du marché."
+      ]},
+      {t:"Fair Value Gap (FVG)",items:[
+        "<span class='hl'>FVG</span> — zone non chevauchée entre 3 bougies lors d'un mouvement violent institutionnel.",
+        "FVG haussière — zone vide créée lors d'un move agressif à la hausse, non retestée.",
+        "FVG baissière — zone vide créée lors d'un move agressif à la baisse, non retestée.",
+        "<span class='hl'>Principe de remplissage</span> : le marché retourne régulièrement combler ses fair value gaps."
+      ]},
+      {t:"BOS & CHoCH",items:[
+        "<span class='hl'>Break of Structure (BOS)</span> — cassure dans la direction de la tendance : signal de continuation.",
+        "<span class='hl'>Change of Character (CHoCH)</span> — cassure contre la tendance : signal de retournement potentiel.",
+        "Différencier BOS et CHoCH selon le contexte macro et le timeframe analysé.",
+        "Utilisation pour valider les entrées et filtrer les faux signaux du marché."
+      ]}
+    ],
+    tip:"🎯 Attendez le stop hunt (chasse à la liquidité), puis observez une réaction forte sur un Order Block ou une FVG. C'est là qu'entrent les institutions."
+  },
+  {
+    n:"06",ic:"⚙️",title:"Indicateurs Techniques",
+    desc:"Maîtriser les indicateurs essentiels : moyennes mobiles, RSI, MACD et bandes de Bollinger.",
+    tags:["Intermédiaire","Indicateurs","Outils"],
+    img:"https://i.pinimg.com/originals/c8/ef/a7/c8efa77c6a3f02d71e0d5b5ee8a72a09.jpg",
+    intro:"Les indicateurs sont des outils mathématiques dérivés des données de prix. Ils complètent l'analyse price action mais ne doivent jamais la remplacer.",
+    sections:[
+      {t:"Moyennes Mobiles (MA)",items:[
+        "<span class='hl'>SMA</span> (Simple Moving Average) — moyenne arithmétique sur N périodes : lente mais stable.",
+        "<span class='hl'>EMA</span> (Exponential Moving Average) — pondère les prix récents : plus réactive aux mouvements.",
+        "<span class='hl'>Golden Cross</span> : EMA 50 croise EMA 200 à la hausse — signal haussier de long terme.",
+        "<span class='hl'>Death Cross</span> : EMA 50 croise EMA 200 à la baisse — signal baissier de long terme.",
+        "Les EMA 20, 50, 100 et 200 utilisées comme supports et résistances dynamiques."
+      ]},
+      {t:"RSI — Relative Strength Index",items:[
+        "RSI calculé sur <span class='hl'>14 périodes</span> — oscillateur entre 0 et 100.",
+        "<span class='hl'>Surachat > 70</span> : potentiel essoufflement haussier, vigilance requise.",
+        "<span class='hl'>Survente < 30</span> : potentiel rebond, acheteurs susceptibles d'intervenir.",
+        "<span class='hl'>Divergences RSI / Prix</span> — signal de retournement puissant : prix fait nouveau sommet, RSI non."
+      ]},
+      {t:"MACD",items:[
+        "<span class='hl'>Ligne MACD</span> = EMA 12 − EMA 26 — mesure l'écart entre deux moyennes exponentielles.",
+        "<span class='hl'>Ligne Signal</span> = EMA 9 du MACD — déclenche les signaux d'achat et de vente.",
+        "<span class='hl'>Histogramme</span> = MACD − Signal : visualise la force et direction du momentum.",
+        "Croisements MACD au-dessus/en-dessous de zéro : changements de momentum majeurs."
+      ]},
+      {t:"Bandes de Bollinger",items:[
+        "Moyenne mobile centrale ± 2 déviations standards de part et d'autre du prix.",
+        "<span class='hl'>Squeeze</span> — faible volatilité précédant souvent un mouvement explosif.",
+        "<span class='hl'>Expansion</span> — sortie des bandes : volatilité exceptionnelle et momentum fort.",
+        "Touches des bandes extrêmes comme zones de retournement potentiel à surveiller."
+      ]}
+    ],
+    tip:"⚡ Aucun indicateur ne prédit l'avenir seul. Utilisez-les uniquement pour confirmer votre analyse price action."
+  },
+  {
+    n:"07",ic:"🌀",title:"Fibonacci & Outils de Mesure",
+    desc:"Appliquer les retracements et extensions de Fibonacci pour trouver des zones d'entrée et des cibles précises.",
+    tags:["Avancé","Fibonacci","Niveaux"],
+    img:"https://tradingsim.com/wp-content/uploads/2019/03/fibonacci-retracement-levels.png",
+    intro:"Fibonacci est basé sur une suite mathématique universelle. Appliquée aux marchés financiers, elle révèle des zones de support et résistance remarquablement précises.",
+    sections:[
+      {t:"Retracements de Fibonacci",items:[
+        "Les niveaux clés : <span class='hl'>23.6%, 38.2%, 50%, 61.8%</span> (golden ratio) et <span class='hl'>78.6%</span>.",
+        "Tracé haussier : du swing low au swing high pour identifier les zones de pullback.",
+        "<span class='hl'>Le golden ratio 61.8%</span> — le niveau le plus respecté par les marchés financiers mondiaux.",
+        "<span class='hl'>Zone OTE</span> (Optimal Trade Entry) : entre 61.8% et 79% — zone privilégiée par les smart money."
+      ]},
+      {t:"Extensions de Fibonacci",items:[
+        "Extensions <span class='hl'>127.2%, 161.8%</span>, 200% et 261.8% comme cibles projetées.",
+        "Placer ses take profits sur des niveaux Fibonacci logiques plutôt qu'arbitraires.",
+        "Combiner retracements d'entrée et extensions de sortie dans une même analyse.",
+        "Confluence Fibonacci + structure = zones de très haute probabilité de réaction."
+      ]},
+      {t:"Autres outils",items:[
+        "<span class='hl'>Pitchfork d'Andrews</span> — canal dynamique défini par 3 points pivots du marché.",
+        "Canaux de tendance parallèles — projeter la continuité d'un mouvement.",
+        "Mesure des vagues — estimer l'amplitude du prochain swing par symétrie."
+      ]}
+    ],
+    tip:"🌀 La confluence entre 61.8%, un support structurel et un Order Block SMC = zone d'entrée de très haute probabilité. Cherchez ces confluences à 3 facteurs."
+  },
+  {
+    n:"08",ic:"🛡️",title:"Gestion du Risque & Psychologie",
+    desc:"Protéger son capital, maîtriser ses émotions et bâtir un plan de trading rigoureux.",
+    tags:["Essentiel","Risk","Psychologie"],
+    img:"https://s3.amazonaws.com/cdn.freshdesk.com/data/helpdesk/attachments/production/43132212382/original/BUXhGKOK3e_IrSfUWRCLrQjrqVHEf6qZWw.png",
+    intro:"La gestion du risque sépare les traders rentables de ceux qui perdent tout. 80% du trading est mental. Maîtrisez votre psychologie avant les marchés.",
+    sections:[
+      {t:"Risk Management fondamental",items:[
+        "<span class='hl'>Règle du 1-2%</span> — ne jamais risquer plus de 1 à 2% du capital total sur un seul trade.",
+        "<span class='hl'>Position sizing</span> — calculer la taille : risque $ ÷ distance jusqu'au stop loss.",
+        "<span class='hl'>Risk/Reward ratio</span> — viser minimum 1:2, idéalement 1:3 ou 1:4.",
+        "Drawdown maximum et circuit breaker : arrêter de trader après X pertes consécutives."
+      ]},
+      {t:"Stop Loss & Take Profit",items:[
+        "<span class='hl'>Stop structurel</span> — placé au-delà du prochain niveau logique de marché.",
+        "<span class='hl'>Stop ATR</span> — adapter la distance du stop à la volatilité actuelle.",
+        "<span class='hl'>Take profit</span> à un niveau de résistance, support ou extension Fibonacci.",
+        "<span class='hl'>Trailing stop</span> — sécuriser les profits en déplaçant le stop dans la tendance."
+      ]},
+      {t:"Psychologie du Trader",items:[
+        "<span class='hl'>FOMO</span> (Fear Of Missing Out) — entrer par peur de rater : la pire des raisons.",
+        "<span class='hl'>Revenge trading</span> — doubler après une perte pour récupérer : spirale destructrice.",
+        "<span class='hl'>Overtrading</span> — moins de trades de qualité = meilleure performance long terme.",
+        "<span class='hl'>Greed management</span> — respecter son plan de sortie même quand le profit semble évident."
+      ]},
+      {t:"Plan de Trading",items:[
+        "Définir par écrit ses règles d'entrée, de gestion et de sortie — sans exception.",
+        "<span class='hl'>Journal de trading</span> — noter et analyser chaque trade pour progresser.",
+        "<span class='hl'>Backtesting rigoureux</span> — valider la stratégie sur l'historique avant le réel.",
+        "Routine : analyse pré-marché, exécution disciplinée, review post-séance systématique."
+      ]}
+    ],
+    tip:"🧘 Votre objectif n'est pas de gagner sur chaque trade — c'est de survivre assez longtemps pour que votre edge statistique joue en votre faveur."
+  },
+  {
+    n:"09",ic:"🔍",title:"Confluence & Stratégies Multi-facteurs",
+    desc:"Combiner plusieurs facteurs d'analyse pour maximiser la probabilité de succès de chaque setup.",
+    tags:["Avancé","Confluence","Stratégie"],
+    img:"https://tradeciety.com/wp-content/uploads/2019/11/confluence-trading-768x403.png",
+    intro:"La confluence est l'art d'aligner plusieurs éléments d'analyse sur une même zone de prix. Plus les facteurs s'alignent, plus le setup est solide et sa probabilité élevée.",
+    sections:[
+      {t:"Le concept de confluence",items:[
+        "Les zones de confluence sont bien plus fiables que les analyses isolées à facteur unique.",
+        "Construire un <span class='hl'>score de confluence</span> (3 facteurs requis sur 5) avant chaque trade.",
+        "Éviter les signaux contradictoires et ne trader que les configurations les plus claires.",
+        "<span class='hl'>La patience comme edge</span> : attendre uniquement les setups à 3+ confluences alignées."
+      ]},
+      {t:"Types de confluence",items:[
+        "<span class='hl'>Structure + Fibonacci</span> : 61.8% tombant exactement sur un support structurel.",
+        "<span class='hl'>Order Block + FVG</span> dans la même zone de prix — double validation SMC.",
+        "<span class='hl'>S/R + chandelier</span> : englobante haussière sur un support majeur bien défini.",
+        "<span class='hl'>RSI divergence + BOS</span> : retournement confirmé simultanément par deux éléments.",
+        "<span class='hl'>Kill zone + Order Block</span> : entrée au début de la session London sur une mitigation d'OB."
+      ]}
+    ],
+    tip:"🔑 La règle des 3 : N'entrez que si vous identifiez au moins 3 facteurs alignés en votre faveur. Cette discipline seule peut transformer votre winrate."
+  },
+  {
+    n:"10",ic:"📅",title:"Sessions de Marché & Timing",
+    desc:"Comprendre les sessions Asie, Londres et New York pour trader aux moments de forte liquidité.",
+    tags:["Pratique","Sessions","Timing"],
+    img:"https://tradepro.ca/wp-content/uploads/2023/05/Best-Hours-to-Trade.jpg",
+    intro:"Le marché crypto fonctionne 24h/24 mais toutes les heures ne se valent pas. Comprendre les sessions permet de trader aux moments de liquidité institutionnelle maximale.",
+    sections:[
+      {t:"Les trois grandes sessions",items:[
+        "<span class='hl'>Session Asie</span> (00h-08h UTC) — faible volatilité, range et accumulation souvent observés.",
+        "<span class='hl'>Session Londres</span> (07h-16h UTC) — ouverture très active, mouvements directionnels majeurs initiés ici.",
+        "<span class='hl'>Session New York</span> (13h-21h UTC) — chevauchement avec Londres : période la plus volatile.",
+        "<span class='hl'>Kill Zones SMC</span> : les 2-3 premières heures de chaque session sont les plus critiques."
+      ]},
+      {t:"Concepts temporels SMC",items:[
+        "<span class='hl'>Daily Bias</span> — déterminer la direction probable de la journée dès l'ouverture asiatique.",
+        "<span class='hl'>Power of 3 (AMD)</span> : Accumulation (Asie), Manipulation (Londres), Distribution (NY).",
+        "<span class='hl'>Midnight open & London open</span> — niveaux de référence clés pour les smart money traders.",
+        "Chevauchement <span class='hl'>London/NY</span> (13h-17h UTC) : volatilité maximale de la journée."
+      ]}
+    ],
+    tip:"⏰ Les meilleures opportunités : 2 premières heures de Londres (07h-09h UTC) et chevauchement London/NY (13h-16h UTC). Réduisez l'exposition en dehors."
+  },
+  {
+    n:"11",ic:"📊",title:"Volume & Analyse On-chain",
+    desc:"Intégrer l'analyse du volume et des données blockchain pour confirmer vos analyses graphiques.",
+    tags:["Avancé","Volume","On-chain"],
+    img:"https://citytradersinperium.com/wp-content/uploads/2023/02/Volume-profile-what-is-it-1024x535.jpg",
+    intro:"Le volume est la vérité du marché : il confirme ou infirme la validité de tout mouvement de prix. En crypto, les données on-chain offrent une transparence unique.",
+    sections:[
+      {t:"Analyse du Volume",items:[
+        "<span class='hl'>Volume croissant au breakout</span> — confirmation que le mouvement est réel et institutionnel.",
+        "<span class='hl'>Volume faible au retracement</span> — signe de santé dans une tendance haussière.",
+        "<span class='hl'>Divergence Volume/Prix</span> — prix monte mais volume baisse : affaiblissement de tendance.",
+        "<span class='hl'>Volume Profile & POC</span> — zones de prix à haute activité : aimants naturels pour le prix."
+      ]},
+      {t:"Métriques On-chain",items:[
+        "<span class='hl'>Exchange Flows</span> — afflux sur exchange = pression de vente, sorties = accumulation.",
+        "<span class='hl'>Open Interest</span> — mesure du positionnement spéculatif global sur les dérivés.",
+        "<span class='hl'>Funding Rate</span> — coût de maintien des perpetuals : signal de sentiment extrême.",
+        "<span class='hl'>Whale movements</span> — transferts des grandes adresses : anticiper les catalystes majeurs."
+      ]}
+    ],
+    tip:"📡 Outils recommandés : CryptoQuant et Glassnode pour le on-chain, CoinGlass pour l'Open Interest, TradingView pour le Volume Profile."
+  },
+  {
+    n:"12",ic:"🚀",title:"Construire sa Stratégie Complète",
+    desc:"Assembler tous les concepts appris en un système de trading personnel, backtesté et discipliné.",
+    tags:["Maîtrise","Système","Stratégie"],
+    img:"https://kjtradingsystems.com/wp-content/uploads/2019/05/equity-curve-picture-1024x566.png",
+    intro:"Après avoir maîtrisé tous les concepts, il est temps de les assembler en un système cohérent, personnel et reproductible. C'est votre edge — votre avantage unique.",
+    sections:[
+      {t:"Architecture d'une stratégie",items:[
+        "Définir son univers : quels actifs surveiller, quels timeframes, quelles sessions trader.",
+        "<span class='hl'>Critères d'entrée</span> précis et non négociables — chaque trade doit cocher toutes les cases.",
+        "<span class='hl'>Critères de sortie</span> objectifs — quand fermer en gain et en perte selon les règles.",
+        "<span class='hl'>Règles d'invalidation</span> — quand la thèse est annulée et le trade doit être coupé."
+      ]},
+      {t:"Backtesting & Validation",items:[
+        "Tester sur <span class='hl'>minimum 100 trades historiques</span> avant d'engager du capital réel.",
+        "Calculer : <span class='hl'>winrate, risk/reward moyen, profit factor, drawdown maximum</span>.",
+        "Optimiser sans over-fitter : chercher la robustesse, pas la perfection historique.",
+        "<span class='hl'>Paper trading</span> — simuler 1 à 3 mois en conditions réelles avant le réel."
+      ]},
+      {t:"Passage au réel",items:[
+        "Commencer avec un capital réduit — l'objectif est d'apprendre à exécuter.",
+        "Tenir un <span class='hl'>journal de trading rigoureux</span> dès le premier jour.",
+        "Réviser et améliorer la stratégie chaque mois sur la base des données réelles.",
+        "<span class='hl'>Consistance et discipline</span> sur la durée — pas de résultats rapides, mais une progression solide."
+      ]}
+    ],
+    tip:"🏆 Le trading est un marathon. Ceux qui réussissent sur le long terme ne sont pas les plus brillants — ce sont les plus disciplinés et les plus cohérents."
+  }
+];
+
+/* ════════════════════════════════════════
+   QUIZ DATA — 48 questions pool (12 tirées aléatoirement à chaque session)
+════════════════════════════════════════ */
+const QUIZ = [
+  /* ── FONDAMENTAUX ── */
+  {cat:"Fondamentaux",q:"Que représente la lettre H dans OHLC ?",a:["high","le plus haut","plus haut","prix maximum","highest"],exp:"H = High, c'est le prix le plus haut atteint pendant la période d'une bougie."},
+  {cat:"Fondamentaux",q:"Quel timeframe est typiquement utilisé en scalping ?",a:["m1","m5","m15","1 minute","5 minutes","15 minutes","1m","5m","15m"],exp:"Le scalping utilise des timeframes très courts : M1, M5 ou M15 pour des positions de quelques minutes."},
+  {cat:"Fondamentaux",q:"Qu'est-ce que le spread en trading ?",a:["difference bid ask","ecart bid ask","bid ask","spread","difference prix achat vente","cout transaction"],exp:"Le spread est la différence entre le prix d'achat (Ask) et le prix de vente (Bid). C'est le coût implicite de chaque transaction."},
+  {cat:"Fondamentaux",q:"En swing trading, quel timeframe analyse-t-on principalement ?",a:["d1","daily","w1","weekly","journalier","hebdomadaire"],exp:"Le swing trading utilise principalement le D1 (Daily) et W1 (Weekly) pour des positions de plusieurs jours à semaines."},
+  {cat:"Fondamentaux",q:"Que représente la lettre O dans OHLC ?",a:["open","ouverture","prix ouverture","opening"],exp:"O = Open, c'est le prix d'ouverture de la période. Il détermine la base du corps du chandelier."},
+  {cat:"Fondamentaux",q:"Quelle couleur a généralement une bougie haussière ?",a:["verte","vert","green","blanche","blanc","white"],exp:"Une bougie haussière (Close > Open) est généralement verte ou blanche selon les logiciels de trading."},
+  {cat:"Fondamentaux",q:"Que signifie le terme 'Day trading' ?",a:["trader dans la journee","positions ouvertes fermees meme jour","trading journalier","intraday","pas de position overnight"],exp:"Le Day trading consiste à ouvrir et fermer toutes ses positions dans la même journée, sans position overnight."},
+  {cat:"Fondamentaux",q:"Qu'est-ce que le Ask en trading ?",a:["prix achat","prix auquel on achete","ask","prix vendeur","offer"],exp:"Le Ask est le prix auquel le marché vous vend l'actif — c'est le prix d'achat pour le trader."},
+  /* ── STRUCTURE / PRICE ACTION ── */
+  {cat:"Structure du marché",q:"Comment appelle-t-on la succession de sommets et creux croissants ?",a:["tendance haussiere","hh hl","higher high higher low","uptrend","hausse"],exp:"Une tendance haussière est identifiée par des Higher Highs (HH) et Higher Lows (HL) successifs."},
+  {cat:"Structure du marché",q:"Qu'est-ce que le retournement de polarité ?",a:["support devient resistance","resistance devient support","polarite","inversion niveau","changement role"],exp:"Le retournement de polarité : un support cassé devient résistance, et une résistance cassée devient support."},
+  {cat:"Structure du marché",q:"Comment s'appelle un marché qui oscille entre deux niveaux horizontaux ?",a:["range","consolidation","lateralisation","marche plat","ranging"],exp:"Un marché en range oscille horizontalement entre un support et une résistance fixes. C'est une phase de neutralité."},
+  {cat:"Structure du marché",q:"Que représente un Higher Low (HL) dans une tendance haussière ?",a:["creux croissant","plus bas plus haut","creux plus eleve","low croissant"],exp:"Un Higher Low est un creux (plus bas) plus élevé que le précédent — signe que les acheteurs défendent des niveaux de plus en plus hauts."},
+  {cat:"Structure du marché",q:"Qu'est-ce qu'un niveau de support ?",a:["zone ou prix rebondit","demande superieure offre","plancher prix","zone achat","floor"],exp:"Un support est une zone de prix où la demande dépasse l'offre — le prix a tendance à rebondir à la hausse depuis ce niveau."},
+  {cat:"Structure du marché",q:"Que représente une résistance sur un graphique ?",a:["zone ou prix rejete","offre superieure demande","plafond prix","zone vente","ceiling"],exp:"Une résistance est une zone où l'offre domine la demande — le prix est rejeté vers le bas depuis ce niveau."},
+  /* ── CHANDELIERS ── */
+  {cat:"Chandeliers",q:"Quel pattern est formé d'une longue mèche basse et d'un petit corps en haut ?",a:["marteau","hammer","pin bar haussier","bougie marteau"],exp:"Le Marteau (Hammer) : longue mèche basse + petit corps en haut. Signal haussier puissant en bas de tendance."},
+  {cat:"Chandeliers",q:"Que signifie un Doji sur un graphique ?",a:["indecision","equilibre","open close identique","ouverture cloture egale","marche hesitant"],exp:"Le Doji signale l'indécision : l'ouverture et la clôture sont quasi identiques, bulls et bears s'annulent parfaitement."},
+  {cat:"Chandeliers",q:"Quelle figure est formée de 3 longues bougies vertes consécutives ?",a:["trois soldats blancs","three white soldiers","3 bougies vertes","trois bougies haussières"],exp:"Les Trois Soldats Blancs : 3 longues bougies vertes consécutives, signal de momentum haussier fort et soutenu."},
+  {cat:"Chandeliers",q:"Qu'est-ce qu'une Englobante Baissière ?",a:["grande bougie rouge avale verte","bearish engulfing","englobante baissiere","rouge englobe verte"],exp:"L'Englobante Baissière : une grande bougie rouge qui avale entièrement le corps de la bougie verte précédente."},
+  {cat:"Chandeliers",q:"Quel pattern de retournement baissier ressemble au Marteau mais en sommet ?",a:["pendu","hanging man","pendu hanging","sommet tendance"],exp:"Le Pendu (Hanging Man) a la même forme que le Marteau mais apparaît en sommet de tendance — signal baissier."},
+  {cat:"Chandeliers",q:"Que signifie une longue mèche haute sur une bougie (Shooting Star) ?",a:["vendeurs rejete hausse","bears rejetent","echec haussiers","shooting star","etoile filante"],exp:"La longue mèche haute signifie que le prix a été poussé haut mais rejeté violemment — les haussiers ont échoué."},
+  /* ── FIGURES CHARTISTES ── */
+  {cat:"Figures chartistes",q:"Quelle figure annonce un retournement haussier→baissier avec 3 sommets ?",a:["tete epaules","head and shoulders","tete et epaules","h&s"],exp:"La Tête & Épaules : 3 sommets (épaule gauche, tête, épaule droite) — signal classique de retournement haussier vers baissier."},
+  {cat:"Figures chartistes",q:"Qu'est-ce qu'un Flag (drapeau) en analyse technique ?",a:["drapeau","consolidation apres impulsion","petit canal continuation","flag","figure continuation"],exp:"Le Flag est une figure de continuation : petit canal de consolidation après une forte impulsion directionnelle."},
+  {cat:"Figures chartistes",q:"Quelle figure de continuation ressemble à un triangle symétrique après une impulsion ?",a:["pennant","fanion","triangle symetrique","triangle apres impulsion"],exp:"Le Pennant (fanion) est une consolidation triangulaire symétrique formée après une forte impulsion — figure de continuation."},
+  {cat:"Figures chartistes",q:"Que signifie un Double Fond sur un graphique ?",a:["double fond","double bottom","deux rebonds support","w pattern","deux creux"],exp:"Le Double Fond : deux rebonds sur le même niveau de support. C'est une base solide signalant une reprise haussière probable."},
+  {cat:"Figures chartistes",q:"Quelle figure montre une résistance testée deux fois sans être cassée ?",a:["double sommet","double top","deux sommets","m pattern","double resistance"],exp:"Le Double Sommet : deux tentatives échouées sur une même résistance. Signal baissier fort confirmé par la cassure du support."},
+  {cat:"Figures chartistes",q:"Comment appelle-t-on un triangle dont la résistance est horizontale et le support monte ?",a:["triangle ascendant","ascending triangle","triangle haussier"],exp:"Le Triangle Ascendant : résistance horizontale + support montant. Le breakout se produit généralement à la hausse."},
+  /* ── SMC ── */
+  {cat:"SMC",q:"Que signifie BOS en Smart Money Concepts ?",a:["break of structure","cassure de structure","rupture structurelle","bos"],exp:"BOS = Break of Structure : cassure d'un niveau structurel dans la direction de la tendance, signe de continuation."},
+  {cat:"SMC",q:"Qu'est-ce qu'un Bullish Order Block ?",a:["derniere bougie baissiere","derniere chandelle rouge","last bearish candle","bougie rouge avant hausse"],exp:"Un Bullish Order Block est la dernière bougie baissière avant un fort mouvement haussier institutionnel."},
+  {cat:"SMC",q:"Que représente un Fair Value Gap (FVG) ?",a:["imbalance","desequilibre","zone vide","gap","zone non retestee","fvg","vide de prix"],exp:"Le FVG est une zone de prix non chevauchée entre 3 bougies, créée par un mouvement violent institutionnel."},
+  {cat:"SMC",q:"Que signifie CHoCH ?",a:["change of character","changement de caractere","retournement tendance","choch"],exp:"CHoCH = Change of Character : cassure d'un niveau contraire à la tendance, signalant un retournement potentiel."},
+  {cat:"SMC",q:"Qu'est-ce que la Sell-side Liquidity (SSL) ?",a:["stops acheteurs","stops en dessous plus bas","liquidite baissiere","stops sous support","sell side"],exp:"La SSL regroupe les stop-loss des acheteurs placés sous les plus bas — les institutions chassent ces zones pour collecter la liquidité."},
+  {cat:"SMC",q:"Qu'est-ce qu'un Stop Hunt ?",a:["chasse aux stops","mouvement pour declencher stops","manipulation stops","liquidity grab","piege"],exp:"Un Stop Hunt est un mouvement brusque conçu pour déclencher les stop-loss des traders avant de repartir dans l'autre direction."},
+  /* ── INDICATEURS ── */
+  {cat:"Indicateurs",q:"Quel niveau du RSI indique une zone de surachat ?",a:["70","superieur 70","plus de 70","overbought","au dessus 70"],exp:"RSI > 70 = zone de surachat. Le marché est potentiellement suracheté et pourrait se retourner à la baisse."},
+  {cat:"Indicateurs",q:"Que signifie EMA ?",a:["exponential moving average","moyenne mobile exponentielle","moyenne exponentielle"],exp:"EMA = Exponential Moving Average. Elle pondère davantage les prix récents, la rendant plus réactive que la SMA."},
+  {cat:"Indicateurs",q:"Qu'est-ce qu'un Golden Cross ?",a:["ema 50 croise ema 200","50 croise 200","croisement haussier ma","golden cross"],exp:"Le Golden Cross se produit quand l'EMA 50 croise l'EMA 200 à la hausse — signal haussier de long terme."},
+  {cat:"Indicateurs",q:"Que signifie SMA ?",a:["simple moving average","moyenne mobile simple","moving average simple"],exp:"SMA = Simple Moving Average. Moyenne arithmétique des prix de clôture sur N périodes — plus lente que l'EMA."},
+  {cat:"Indicateurs",q:"Qu'est-ce que le Death Cross ?",a:["ema 50 croise ema 200 a la baisse","croisement baissier","death cross","50 passe sous 200"],exp:"Le Death Cross : l'EMA 50 croise l'EMA 200 à la baisse — signal baissier de long terme, opposé du Golden Cross."},
+  {cat:"Indicateurs",q:"Qu'indique un RSI en dessous de 30 ?",a:["survente","oversold","marche survendu","signal achat potentiel","30"],exp:"RSI < 30 = zone de survente. Le marché est potentiellement survendu et un rebond est possible."},
+  /* ── FIBONACCI ── */
+  {cat:"Fibonacci",q:"Quel niveau de Fibonacci est considéré comme le golden ratio ?",a:["61.8","618","61,8","0.618","soixante et un virgule huit"],exp:"Le golden ratio de Fibonacci est le niveau 61.8% — le plus respecté et le plus fiable sur tous les marchés financiers."},
+  {cat:"Fibonacci",q:"Que signifie OTE dans le contexte SMC/Fibonacci ?",a:["optimal trade entry","zone entree optimale","61 79","meilleure entree"],exp:"OTE = Optimal Trade Entry : zone entre 61.8% et 79% de retracement, privilégiée par les smart money pour entrer en position."},
+  {cat:"Fibonacci",q:"Quelle extension Fibonacci représente aussi un golden ratio projeté ?",a:["161.8","161","1618","161,8"],exp:"L'extension 161.8% est le golden ratio projeté — souvent utilisée comme première cible de take profit majeure."},
+  {cat:"Fibonacci",q:"Comment trace-t-on un retracement Fibonacci haussier ?",a:["bas vers haut","swing low swing high","du plus bas au plus haut","point a vers point b"],exp:"On trace du swing low (point A, plus bas) vers le swing high (point B, plus haut) pour identifier les zones de pullback potentielles."},
+  /* ── RISK MANAGEMENT ── */
+  {cat:"Risk Management",q:"Quel pourcentage maximum du capital risquer par trade ?",a:["1","2","1%","2%","un pourcent","deux pourcent","1 a 2","entre 1 et 2"],exp:"La règle fondamentale : ne jamais risquer plus de 1 à 2% du capital total sur un seul trade."},
+  {cat:"Risk Management",q:"Que signifie un Risk/Reward ratio de 1:3 ?",a:["risque 1 gain 3","gagner 3 fois le risque","1 pour 3","rr 3","reward 3 fois"],exp:"Un RR de 1:3 signifie que pour chaque unité risquée, on vise 3 unités de gain. Même avec 33% de winrate, on est profitable."},
+  {cat:"Risk Management",q:"Qu'est-ce que le FOMO en trading ?",a:["fear of missing out","peur de rater","peur manquer opportunite","entrer par peur"],exp:"FOMO = Fear Of Missing Out. Entrer dans un trade par peur de rater une opportunité — une des principales causes de pertes."},
+  {cat:"Risk Management",q:"Qu'est-ce que le revenge trading ?",a:["trader pour recuperer perte","doubler apres perte","vouloir recuperer","revanche trading","surtrader apres perte"],exp:"Le revenge trading consiste à surtrader ou sur-sizer après une perte pour la récupérer vite. C'est une spirale destructrice."},
+  /* ── SESSIONS ── */
+  {cat:"Sessions",q:"Quelle session est la plus volatile avec le chevauchement London/NY ?",a:["new york","ny","london new york","overlap","chevauchement","13h","17h"],exp:"Le chevauchement London/New York (13h-17h UTC) est la période la plus liquide et volatile de toute la journée."},
+  {cat:"Sessions",q:"À quelle heure UTC ouvre la session de Londres ?",a:["7h","7","07h","07:00","7 heures utc"],exp:"La session de Londres ouvre à 7h UTC (8h heure française hiver). C'est là que démarrent la majorité des grands mouvements."},
+  {cat:"Sessions",q:"Que signifie AMD dans le Power of 3 (SMC) ?",a:["accumulation manipulation distribution","amd","accumulation manip distrib"],exp:"AMD = Accumulation (Asie), Manipulation (Londres), Distribution (New York) — le cycle institutionnel journalier en SMC."},
+  /* ── CONFLUENCE ── */
+  {cat:"Confluence",q:"Combien de facteurs minimum recommande-t-on pour valider un trade ?",a:["3","trois","3 facteurs","trois facteurs","minimum 3"],exp:"La règle des 3 confluences : n'entrez que si au moins 3 facteurs distincts confirment votre setup simultanément."},
+  {cat:"Confluence",q:"Quelle combinaison est un exemple de confluence SMC ?",a:["order block fvg","ob fvg","order block fair value gap","ob imbalance"],exp:"Un Order Block + une Fair Value Gap dans la même zone de prix constituent une double confluence SMC très puissante."}
+];
+
+/* ════════════════════════════════════════
+   RENDER GRID CARDS
+════════════════════════════════════════ */
+function renderGrid() {
+  const g = document.getElementById('grid');
+  CH.forEach((ch, i) => {
+    const card = document.createElement('div');
+    card.className = 'card reveal';
+    card.style.transitionDelay = (i * 0.04) + 's';
+    card.innerHTML = `
+      <div class="card-img">
+        <img src="${ch.img}" alt="${ch.title}" loading="lazy"
+          onerror="this.style.display='none';document.getElementById('fb${i}').style.display='flex';">
+        <div id="fb${i}" class="card-img-fb">${ch.ic}</div>
+        <div class="card-img-overlay"></div>
+        <div class="card-num">Chapitre ${ch.n}</div>
+        <div class="card-ico">${ch.ic}</div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${ch.title}</div>
+        <div class="card-desc">${ch.desc}</div>
+        <div class="card-foot">
+          <div class="card-tags">${ch.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+          <div class="card-arr">→</div>
+        </div>
+      </div>`;
+    card.addEventListener('click', () => openChapter(i));
+    g.appendChild(card);
+  });
+}
+
+/* ════════════════════════════════════════
+   CHAPTER PAGE
+════════════════════════════════════════ */
+let curIdx = 0;
+let transitioning = false;
+
+function buildChapterContent(i) {
+  const ch = CH[i];
+  // counter & nav buttons
+  document.getElementById('cp-counter').textContent = `${i+1} / ${CH.length}`;
+  document.getElementById('btn-prev').disabled = i === 0;
+  document.getElementById('fp-prev').style.visibility = i === 0 ? 'hidden' : 'visible';
+  document.getElementById('btn-next').disabled = i === CH.length - 1;
+  const fpNext = document.getElementById('fp-next');
+  if (i === CH.length - 1) { fpNext.textContent = '↺ Recommencer'; fpNext.onclick = () => openChapter(0); }
+  else { fpNext.textContent = 'Suivant →'; fpNext.onclick = nextChapter; }
+
+  // image
+  const img = document.getElementById('cp-img');
+  const fb  = document.getElementById('cp-img-fb');
+  img.style.display = 'block'; fb.style.display = 'none';
+  fb.textContent = ch.ic; img.src = ch.img; img.alt = ch.title;
+  img.onerror = () => { img.style.display='none'; fb.style.display='flex'; };
+
+  // header
+  document.getElementById('cp-tag').textContent   = 'Chapitre ' + ch.n;
+  document.getElementById('cp-title').textContent = ch.title;
+
+  // body
+  let html = `<div class="cp-intro">${ch.intro}</div>`;
+  ch.sections.forEach((s, si) => {
+    html += `<div class="cp-section">
+      <div class="cp-section-title">
+        <div class="sec-num">${String(si+1).padStart(2,'0')}</div>
+        ${s.t}
+        <div class="sec-line"></div>
+      </div>
+      <div class="cp-items">
+        ${s.items.map(it => `<div class="cp-item"><div class="cp-item-dot"></div><div class="cp-item-text">${it}</div></div>`).join('')}
+      </div>
+    </div>`;
+  });
+  html += `<div class="cp-tip"><div class="cp-tip-ico">💬</div><div>${ch.tip}</div></div>`;
+
+  // FAQ accordion (chapter 1 only)
+  if (ch.faq && ch.faq.length) {
+    html += `<div class="cp-faq"><div class="faq-title">Questions fréquentes</div>`;
+    ch.faq.forEach((f, fi) => {
+      html += `<div class="faq-item" id="faq-${fi}">
+        <div class="faq-q" data-faq="${fi}">
+          <span>${f.q}</span>
+          <div class="faq-icon">+</div>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner">${f.a}</div></div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  document.getElementById('cp-body').innerHTML = html;
+
+  // Attach FAQ click events after render
+  document.querySelectorAll('.faq-q').forEach(el => {
+    el.addEventListener('click', () => {
+      const idx = parseInt(el.getAttribute('data-faq'));
+      const item = document.getElementById('faq-' + idx);
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(x => x.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+}
+
+function openChapter(i) {
+  curIdx = i;
+  const page   = document.getElementById('chapter-page');
+  const scroll = document.getElementById('cp-scroll');
+  const inner  = document.getElementById('cp-inner');
+  const isOpen = page.classList.contains('open');
+  if (!isOpen) {
+    buildChapterContent(i);
+    scroll.scrollTop = 0;
+    page.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  } else {
+    if (transitioning) return;
+    transitioning = true;
+    inner.classList.add('fading');
+    setTimeout(() => {
+      buildChapterContent(i);
+      scroll.scrollTop = 0;
+      inner.classList.remove('fading');
+      transitioning = false;
+    }, 270);
+  }
+}
+
+function closeChapter() {
+  document.getElementById('chapter-page').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function nextChapter() { if (curIdx < CH.length-1) openChapter(curIdx+1); }
+function prevChapter() { if (curIdx > 0) openChapter(curIdx-1); }
+
+document.addEventListener('keydown', e => {
+  const cp = document.getElementById('chapter-page').classList.contains('open');
+  const qp = document.getElementById('quiz-page').classList.contains('open');
+  if (cp) {
+    if (e.key==='Escape') closeChapter();
+    if (e.key==='ArrowRight') nextChapter();
+    if (e.key==='ArrowLeft') prevChapter();
+  }
+  if (qp && e.key==='Escape') closeQuiz();
+});
+
+/* ════════════════════════════════════════
+   QUIZ ENGINE
+════════════════════════════════════════ */
+let quizCorrect = 0;
+let quizAnswered = 0;
+window._quizData = [];
+
+function updateScore() {
+  document.getElementById('quiz-score').textContent = quizCorrect + ' / ' + quizAnswered;
+}
+
+function openQuiz() {
+  quizCorrect = 0; quizAnswered = 0;
+  updateScore();
+  renderQuiz();
+  const page = document.getElementById('quiz-page');
+  page.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  // Stagger card animations
+  setTimeout(() => {
+    const cards = document.querySelectorAll('.q-card');
+    cards.forEach((c, i) => {
+      setTimeout(() => {
+        c.style.transition = 'opacity .45s ease, transform .45s cubic-bezier(.34,1.2,.64,1)';
+        c.style.opacity = '1';
+        c.style.transform = 'translateY(0)';
+      }, i * 55);
+    });
+  }, 80);
+  fireOpenBurst();
+}
+
+function closeQuiz() {
+  document.getElementById('quiz-page').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function renderQuiz() {
+  const grid = document.getElementById('quiz-grid');
+  grid.innerHTML = '';
+
+  // Fisher-Yates shuffle, then take first 12 — guaranteed different each time
+  const pool = [...QUIZ];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  window._quizData = pool.slice(0, 12);
+  window._quizData.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = 'qc-' + i;
+    // already starts hidden for stagger
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+
+    const chip = document.createElement('div');
+    chip.className = 'q-chip';
+    chip.textContent = '📚 ' + q.cat;
+
+    const qtxt = document.createElement('div');
+    qtxt.className = 'q-text';
+    qtxt.textContent = q.q;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'q-input-wrap';
+
+    const inp = document.createElement('input');
+    inp.className = 'q-input';
+    inp.id = 'qi-' + i;
+    inp.type = 'text';
+    inp.placeholder = 'Ta réponse…';
+    inp.autocomplete = 'off';
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkAnswer(i); });
+
+    const btn = document.createElement('button');
+    btn.className = 'q-submit';
+    btn.id = 'qs-' + i;
+    btn.textContent = 'Valider';
+    btn.addEventListener('click', () => checkAnswer(i));
+
+    const fb = document.createElement('div');
+    fb.className = 'q-feedback';
+    fb.id = 'qf-' + i;
+
+    wrap.appendChild(inp);
+    wrap.appendChild(btn);
+    card.appendChild(chip);
+    card.appendChild(qtxt);
+    card.appendChild(wrap);
+    card.appendChild(fb);
+    grid.appendChild(card);
+  });
+}
+
+function normalizeStr(str) {
+  return str.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const d = [];
+  for (let i = 0; i <= m; i++) { d[i] = [i]; }
+  for (let j = 0; j <= n; j++) { d[0][j] = j; }
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      d[i][j] = a[i-1] === b[j-1] ? d[i-1][j-1] : 1 + Math.min(d[i-1][j-1], d[i-1][j], d[i][j-1]);
+    }
+  }
+  return d[m][n];
+}
+
+function checkAnswer(i) {
+  const q    = window._quizData[i];
+  const inp  = document.getElementById('qi-' + i);
+  const card = document.getElementById('qc-' + i);
+  const fb   = document.getElementById('qf-' + i);
+  const btn  = document.getElementById('qs-' + i);
+  if (!q || !inp) return;
+  const val = normalizeStr(inp.value);
+  if (!val) { inp.focus(); return; }
+
+  const isCorrect = q.a.some(ans => {
+    const na = normalizeStr(ans);
+    if (!na) return false;
+    if (val === na) return true;
+    if (val.length >= 3 && na.includes(val)) return true;
+    if (na.length >= 3 && val.includes(na)) return true;
+    const maxDist = na.length <= 5 ? 1 : na.length <= 9 ? 2 : 3;
+    return levenshtein(val, na) <= maxDist;
+  });
+
+  quizAnswered++;
+  inp.disabled = true;
+  btn.disabled = true;
+
+  if (isCorrect) {
+    quizCorrect++;
+    card.classList.add('correct');
+    inp.classList.add('correct');
+    fb.className = 'q-feedback show correct-fb';
+    fb.innerHTML = '✅ <strong>Correct !</strong> ' + q.exp;
+    fireSuccess(card);
+  } else {
+    card.classList.add('wrong');
+    inp.classList.add('wrong');
+    fb.className = 'q-feedback show wrong-fb';
+    fb.innerHTML = '❌ <strong>Pas tout à fait.</strong> ' + q.exp;
+  }
+  updateScore();
+}
+
+/* ════════════════════════════════════════
+   CONFETTI & ANIMATIONS
+════════════════════════════════════════ */
+let confAF = null;
+
+function fireSuccess(sourceCard) {
+  const canvas = document.getElementById('confetti-canvas');
+  const flash  = document.getElementById('success-flash');
+  const ctx    = canvas.getContext('2d');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  // Flash
+  flash.classList.add('active');
+  setTimeout(() => flash.classList.remove('active'), 600);
+
+  // Origin from card center
+  const rect = sourceCard ? sourceCard.getBoundingClientRect() : {left:canvas.width/2, top:canvas.height/2, width:0, height:0};
+  const ox = rect.left + rect.width/2;
+  const oy = rect.top  + rect.height/2;
+
+  const COLS = ['#c9a84c','#e8c96a','#a855f7','#7c3aed','#f0f0f0','#60a5fa','#34d399'];
+  const pts = Array.from({length:80}, () => ({
+    x:ox, y:oy,
+    vx:(Math.random()-0.5)*14,
+    vy:-(Math.random()*10+3),
+    r:Math.random()*5+2,
+    col:COLS[Math.floor(Math.random()*COLS.length)],
+    rot:Math.random()*360, rv:(Math.random()-0.5)*12,
+    alpha:1, shape:Math.random()>.5?'rect':'circle'
+  }));
+
+  canvas.classList.add('active');
+  if (confAF) cancelAnimationFrame(confAF);
+
+  function drawConf() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    let alive = false;
+    pts.forEach(p => {
+      p.vy += .3; p.x += p.vx; p.y += p.vy;
+      p.rot += p.rv; p.alpha -= .015;
+      if (p.alpha > 0) alive = true;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.alpha);
+      ctx.fillStyle = p.col;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI/180);
+      if (p.shape === 'rect') ctx.fillRect(-p.r, -p.r*.4, p.r*2, p.r*.8);
+      else { ctx.beginPath(); ctx.arc(0,0,p.r*.6,0,Math.PI*2); ctx.fill(); }
+      ctx.restore();
+    });
+    if (alive) confAF = requestAnimationFrame(drawConf);
+    else { canvas.classList.remove('active'); ctx.clearRect(0,0,canvas.width,canvas.height); }
+  }
+  drawConf();
+}
+
+function fireOpenBurst() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx    = canvas.getContext('2d');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const COLS = ['#c9a84c','#a855f7','#7c3aed','#e8c96a','#60a5fa'];
+  const pts = Array.from({length:55}, () => ({
+    x:canvas.width/2 + (Math.random()-.5)*300,
+    y:canvas.height * .45,
+    vx:(Math.random()-.5)*10, vy:-(Math.random()*6+2),
+    r:Math.random()*4+2, col:COLS[Math.floor(Math.random()*COLS.length)],
+    rot:Math.random()*360, rv:(Math.random()-.5)*10, alpha:1,
+    shape:Math.random()>.5?'rect':'circle'
+  }));
+  canvas.classList.add('active');
+  let af = null;
+  function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    let alive=false;
+    pts.forEach(p=>{
+      p.vy+=.25; p.x+=p.vx; p.y+=p.vy; p.rot+=p.rv; p.alpha-=.018;
+      if(p.alpha>0) alive=true;
+      ctx.save(); ctx.globalAlpha=Math.max(0,p.alpha); ctx.fillStyle=p.col;
+      ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+      if(p.shape==='rect') ctx.fillRect(-p.r,-p.r*.4,p.r*2,p.r*.8);
+      else{ctx.beginPath();ctx.arc(0,0,p.r*.6,0,Math.PI*2);ctx.fill();}
+      ctx.restore();
+    });
+    if(alive) af=requestAnimationFrame(draw);
+    else{canvas.classList.remove('active');ctx.clearRect(0,0,canvas.width,canvas.height);}
+  }
+  draw();
+}
+
+/* ════════════════════════════════════════
+   MOBILE MENU
+════════════════════════════════════════ */
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobile-menu');
+  const btn  = document.getElementById('nav-ham-btn');
+  const isOpen = menu.classList.contains('open');
+  if (isOpen) { closeMobileMenu(); }
+  else {
+    menu.classList.add('open');
+    btn.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+}
+function closeMobileMenu() {
+  document.getElementById('mobile-menu').classList.remove('open');
+  document.getElementById('nav-ham-btn').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* ════════════════════════════════════════
+   PARTICLES BACKGROUND
+════════════════════════════════════════ */
+function initParticles() {
+  const c = document.getElementById('canvas');
+  const ctx = c.getContext('2d');
+  let W = c.width = window.innerWidth;
+  let H = c.height = window.innerHeight;
+  const COLS = ['#c9a84c','#7c3aed','#2563eb','#a855f7'];
+  const pts = Array.from({length:70}, () => ({
+    x:Math.random()*W, y:Math.random()*H,
+    r:Math.random()*1.4+0.3,
+    vx:(Math.random()-.5)*.26, vy:(Math.random()-.5)*.26,
+    a:Math.random()*.42+.1,
+    col:COLS[Math.floor(Math.random()*COLS.length)]
+  }));
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p => {
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=p.col; ctx.globalAlpha=p.a; ctx.fill();
+    });
+    ctx.globalAlpha=1;
+    for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){
+      const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y, d=Math.sqrt(dx*dx+dy*dy);
+      if(d<115){
+        ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y);
+        ctx.strokeStyle=`rgba(201,168,76,${.05*(1-d/115)})`; ctx.lineWidth=.4; ctx.stroke();
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+  window.addEventListener('resize', ()=>{ W=c.width=window.innerWidth; H=c.height=window.innerHeight; });
+}
+
+/* ════════════════════════════════════════
+   SCROLL & REVEAL
+════════════════════════════════════════ */
+function scrollToSection(id) {
+  const page = document.getElementById('chapter-page');
+  if (page.classList.contains('open')) {
+    closeChapter();
+    setTimeout(() => { document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}); }, 480);
+  } else {
+    document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
+function goHome() { window.scrollTo({top:0,behavior:'smooth'}); }
+
+function initScroll() {
+  const nav  = document.getElementById('navbar');
+  const prog = document.getElementById('prog');
+  const obs  = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('v'); });
+  }, {threshold:.08, rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  window.addEventListener('scroll', () => {
+    const s = window.scrollY, max = document.documentElement.scrollHeight - window.innerHeight;
+    prog.style.width = (s/max*100) + '%';
+    nav.classList.toggle('scrolled', s > 60);
+  }, {passive:true});
+}
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+renderGrid();
+initParticles();
+initScroll();
+</script>
+</body>
+</html>
